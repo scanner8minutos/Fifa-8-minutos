@@ -433,16 +433,16 @@
             const val = parseFloat(sugestaoOver);
             let mensagens = (val >= 4.0) ? [
                 `Padrão ofensivo detectado. As últimas partidas mostram um confronto aberto, com equipes buscando o gol durante todo o jogo. Sugestão: Over ${sugestaoOver} gols.`,
-                `Alta intensidade ofensiva detectada. Sugestão: Over ${sugestaoOver} gols.`,
-                `Partida com tendência de muitos gols. Sugestão: Over ${sugestaoOver} gols.`,
-                `Fluxo ofensivo alto: Sugestão: Over ${sugestaoOver} gols.`,
-                `Confronto propício para um placar dilatado: Over ${sugestaoOver} gols.`
+                `O histórico recente indica alta intensidade ofensiva, aumentando significativamente a probabilidade de um jogo com muitos gols. Sugestão: Over ${sugestaoOver} gols.`,
+                `Os dados identificam um confronto de ritmo acelerado, com grande volume de oportunidades criadas. Sugestão: Over ${sugestaoOver} gols.`,
+                `O comportamento das equipes nas últimas partidas demonstra um cenário favorável para um placar movimentado. Sugestão: Over ${sugestaoOver} gols.`,
+                `As estatísticas recentes apontam uma forte tendência para um jogo aberto, com ataques levando vantagem sobre as defesas. Sugestão: Over ${sugestaoOver} gols.`
             ] : [
-                `Jogo mais estudado. Sugestão: Over ${sugestaoOver} gols.`,
-                `Confronto de cautela e defesas sólidas. Sugestão: Over ${sugestaoOver} gols.`,
-                `Partida tática: Sugestão: Over ${sugestaoOver} gols.`,
-                `Dados indicam um confronto mais travado: Over ${sugestaoOver} gols.`,
-                `Ritmo de jogo contido identificado. Sugestão: Over ${sugestaoOver} gols.`
+                `Padrão defensivo identificado. As últimas partidas demonstram um confronto mais truncado, com poucas oportunidades claras de gol. Sugestão: Over ${sugestaoOver} gols.`,
+                `Os dados recentes revelam equipes que priorizam a organização defensiva, reduzindo o volume ofensivo da partida. Sugestão: Over ${sugestaoOver} gols.`,
+                `O histórico aponta um jogo equilibrado, onde as defesas têm conseguido neutralizar a maioria das ações ofensivas. Sugestão: Over ${sugestaoOver} gols.`,
+                `As estatísticas indicam uma tendência de ritmo mais controlado, com poucas finalizações e placares discretos. Sugestão: Over ${sugestaoOver} gols.`,
+                `Os últimos confrontos apresentam um comportamento tático, com equipes estudando bastante as jogadas antes de atacar. Sugestão: Over ${sugestaoOver} gols.`
             ];
             document.getElementById('sugestao').innerText = mensagens[Math.floor(Math.random() * mensagens.length)];
         } else {
