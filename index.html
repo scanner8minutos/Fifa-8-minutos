@@ -513,6 +513,7 @@
         const container = document.getElementById(containerId);
         container.innerHTML = ''; 
         const ultimos5 = resultados.slice(0, 5); 
+        
         while(ultimos5.length < 5) {
             ultimos5.push('vazio'); 
         }
@@ -520,10 +521,22 @@
         ultimos5.forEach(res => {
             const bola = document.createElement('div');
             bola.classList.add('bola-historico');
-            if (res === 'V') bola.classList.add('bola-vitoria');
-            else if (res === 'D') bola.classList.add('bola-derrota');
-            else if (res === 'E') bola.classList.add('bola-empate');
-            else bola.classList.add('bola-vazia');
+            
+            // 1. Converte para string
+            // 2. Remove espaços extras (trim)
+            // 3. Converte para maiúsculo (toUpperCase)
+            const valorLimpo = String(res).trim().toUpperCase();
+
+            if (valorLimpo === 'V') {
+                bola.classList.add('bola-vitoria');
+            } else if (valorLimpo === 'D') {
+                bola.classList.add('bola-derrota');
+            } else if (valorLimpo === 'E') {
+                bola.classList.add('bola-empate');
+            } else {
+                bola.classList.add('bola-vazia');
+            }
+            
             container.appendChild(bola);
         });
     }
