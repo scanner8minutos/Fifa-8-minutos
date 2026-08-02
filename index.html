@@ -251,7 +251,6 @@
         btnLogin.innerText = "VALIDANDO...";
         
         try {
-            // 1. Faz o login oficial (Cria a sessão no Supabase para ativar o RLS)
             const { data: authData, error: authError } = await db.auth.signInWithPassword({
                 email: user,
                 password: pass
@@ -259,7 +258,6 @@
             
             if (authError) throw authError;
 
-            // 2. Busca o 'tipo' do usuário na tabela, já que o auth não traz colunas personalizadas
             const { data: userData, error: userError } = await db
                 .from('usuarios')
                 .select('tipo')
@@ -268,7 +266,6 @@
 
             if (userError) throw userError;
 
-            // 3. Mantém sua lógica original intacta
             if (userData) {
                 isVip = (userData.tipo && userData.tipo.toLowerCase() === "assinante");
                 document.getElementById('login-container').classList.add('hidden');
@@ -322,7 +319,6 @@
 
         btn.innerText = "Cadastrando...";
         try {
-            // 1. Cadastra no sistema oficial do Supabase
             const { data: authData, error: authError } = await db.auth.signUp({
                 email: user,
                 password: pass
@@ -330,7 +326,6 @@
 
             if (authError) throw authError;
 
-            // 2. Salva o registro na sua tabela 'usuarios'
             const { error: dbError } = await db
                 .from('usuarios')
                 .insert([{ email: user, senha: pass, tipo: 'gratis' }]);
@@ -344,6 +339,46 @@
             alert("Erro ao cadastrar: " + err.message); 
         }
         btn.innerText = "Criar Conta";
+    }
+
+    function calcularScorePonderado(confrontos, meta, is1T = false, jogador = null) {
+        if (!confrontos || confrontos.length < 3) return 0;
+
+        const filtrarGols = (c) => {
+            let gols;
+            if (is1T) {
+                gols = (c.Gols_Casa_1T || 0) + (c.Gols_Visitante_1T || 0);
+            } else {
+                gols = (c.Gols_Casa || 0) + (c.Gols_Visitante || 0);
+            }
+            
+            // Se for jogador específico, aplica lógica simples de gols do jogador
+            if (jogador) {
+                const ehCasa = (c.Jogador_Casa === jogador);
+                gols = ehCasa ? (c.Gols_Casa || 0) : (c.Gols_Visitante || 0);
+            }
+            return gols;
+        };
+
+        const acertos = confrontos.filter(c => filtrarGols(c) >= meta).length;
+        const freq_prob = (acertos / confrontos.length) * 100;
+
+        const recentes = confrontos.slice(-10).reverse();
+        let weightedSum = 0;
+        let pesoTotal = 0;
+        
+        recentes.forEach((c, index) => {
+            const peso = recentes.length - index;
+            const hit = filtrarGols(c) >= meta ? 1 : 0;
+            weightedSum += (hit * peso);
+            pesoTotal += peso;
+        });
+        
+        const weighted_prob = (weightedSum / pesoTotal) * 100;
+        const confianca_idx = Math.min(confrontos.length / 30, 1.0);
+        const finalScore = (freq_prob * 0.6) + (weighted_prob * 0.2) + (confianca_idx * 100 * 0.2);
+        
+        return finalScore;
     }
 
     async function analisar() {
@@ -376,7 +411,6 @@
         let gA = 0, gB = 0, vA = 0, vB = 0, empates = 0, ambasMarcamCount = 0, ambasMarcam1TCount = 0;
         let totalGols = 0, totalGols1T = 0;
         let golsSofridosA = 0, golsSofridosB = 0;
-        let counts = { jogo: Array(8).fill(0), jogA: Array(8).fill(0), jogB: Array(8).fill(0), jogo1T: Array(8).fill(0) };
 
         confrontos.forEach(c => {
             const ehCasa = (c.Jogador_Casa === A);
@@ -386,25 +420,17 @@
             let sofridosB = (ehCasa ? (c.Gols_Casa || 0) : (c.Gols_Visitante || 0));
             let golsA1T = ehCasa ? (c.Gols_Casa_1T || 0) : (c.Gols_Visitante_1T || 0);
             let golsB1T = ehCasa ? (c.Gols_Visitante_1T || 0) : (c.Gols_Casa_1T || 0);
-            let gols1T = (c.Gols_Casa_1T || 0) + (c.Gols_Visitante_1T || 0);
             
             gA += golsA; 
             gB += golsB; 
             golsSofridosA += sofridosA;
             golsSofridosB += sofridosB;
             totalGols += (golsA + golsB); 
-            totalGols1T += gols1T;
+            totalGols1T += ((c.Gols_Casa_1T || 0) + (c.Gols_Visitante_1T || 0));
             
             if (golsA > golsB) vA++; else if (golsB > golsA) vB++; else empates++;
             if (golsA > 0 && golsB > 0) ambasMarcamCount++;
             if (golsA1T > 0 && golsB1T > 0) ambasMarcam1TCount++; 
-            
-            for (let i = 0; i < 8; i++) {
-                if ((golsA + golsB) >= (i + 0.5)) counts.jogo[i]++;
-                if (gols1T >= (i + 0.5)) counts.jogo1T[i]++;
-                if (golsA >= (i + 0.5)) counts.jogA[i]++;
-                if (golsB >= (i + 0.5)) counts.jogB[i]++;
-            }
         });
 
         const total = confrontos.length;
@@ -427,35 +453,32 @@
         renderizarBolinhas('bolinhas-B', formB);
 
         const mediaGols = totalGols / total;
-        let sugestaoOver = Math.max(0.5, mediaGols - 1.5).toFixed(1); 
+        let sugestaoOver = Math.max(0.5, mediaGols - 2).toFixed(1); 
         
         if (isVip) {
             const val = parseFloat(sugestaoOver);
             let mensagens = (val >= 4.0) ? [
-                `Padrão ofensivo detectado. As últimas partidas mostram um confronto aberto, com equipes buscando o gol durante todo o jogo. Sugestão: Over ${sugestaoOver} gols.`,
-                `O histórico recente indica alta intensidade ofensiva, aumentando significativamente a probabilidade de um jogo com muitos gols. Sugestão: Over ${sugestaoOver} gols.`,
-                `Os dados identificam um confronto de ritmo acelerado, com grande volume de oportunidades criadas. Sugestão: Over ${sugestaoOver} gols.`,
-                `O comportamento das equipes nas últimas partidas demonstra um cenário favorável para um placar movimentado. Sugestão: Over ${sugestaoOver} gols.`,
-                `As estatísticas recentes apontam uma forte tendência para um jogo aberto, com ataques levando vantagem sobre as defesas. Sugestão: Over ${sugestaoOver} gols.`
+                `Jogo extremamente movimentado. Sugestão: Over ${sugestaoOver} gols.`,
+                `Alta intensidade ofensiva detectada. Sugestão: Over ${sugestaoOver} gols.`,
+                `Partida com tendência de muitos gols. Sugestão: Over ${sugestaoOver} gols.`,
+                `Fluxo ofensivo alto: Sugestão: Over ${sugestaoOver} gols.`,
+                `Confronto propício para um placar dilatado: Over ${sugestaoOver} gols.`
             ] : [
-                `Padrão defensivo identificado. As últimas partidas demonstram um confronto mais truncado, com poucas oportunidades claras de gol. Sugestão: Over ${sugestaoOver} gols.`,
-                `Os dados recentes revelam equipes que priorizam a organização defensiva, reduzindo o volume ofensivo da partida. Sugestão: Over ${sugestaoOver} gols.`,
-                `O histórico aponta um jogo equilibrado, onde as defesas têm conseguido neutralizar a maioria das ações ofensivas. Sugestão: Over ${sugestaoOver} gols.`,
-                `As estatísticas indicam uma tendência de ritmo mais controlado, com poucas finalizações e placares discretos. Sugestão: Over ${sugestaoOver} gols.`,
-                `Os últimos confrontos apresentam um comportamento tático, com equipes estudando bastante as jogadas antes de atacar. Sugestão: Over ${sugestaoOver} gols.`
+                `Jogo mais estudado. Sugestão: Over ${sugestaoOver} gols.`,
+                `Confronto de cautela e defesas sólidas. Sugestão: Over ${sugestaoOver} gols.`,
+                `Partida tática: Sugestão: Over ${sugestaoOver} gols.`,
+                `Dados indicam um confronto mais travado: Over ${sugestaoOver} gols.`,
+                `Ritmo de jogo contido identificado. Sugestão: Over ${sugestaoOver} gols.`
             ];
             document.getElementById('sugestao').innerText = mensagens[Math.floor(Math.random() * mensagens.length)];
         } else {
             document.getElementById('sugestao').innerHTML = '<a href="pagamento.html" class="btn-vip" target="_blank" style="padding: 5px 10px; display: inline-block;">🔒 SUGESTÃO VIP</a>';
         }
 
-        const renderBar = (count, total, label, i) => {
-            const val = total > 0 ? (count / total) * 100 : 0;
-            
-            // Define se a linha é 0.5 ou 1.5
+        const renderBar = (meta, label, confrontos, is1T = false, jogador = null) => {
+            const val = calcularScorePonderado(confrontos, meta, is1T, jogador);
             const ehLinhaLiberada = (label.includes("0.5"));
 
-            // Permite visualização se for VIP OU se for uma das linhas liberadas
             if (!isVip && !ehLinhaLiberada) { 
                 return `<div class="card"><div style="margin-bottom:5px; font-size:12px;">${label}</div><a href="pagamento.html" class="btn-vip" target="_blank" style="padding: 5px; font-size: 11px;">🔒 APENAS VIP</a></div>`;
             }
@@ -483,10 +506,10 @@
             ${renderVipStat('Gols Feitos ' + B, gB)}
             ${renderVipStat('Sofridos ' + B, golsSofridosB)}
             <div class="card grid-columns" style="grid-column: 1 / -1;">
-                <div><h3>OVER GOLS NO 1º TEMPO</h3>${counts.jogo1T.map((c, i) => renderBar(c, total, (i+0.5)+' Gols', i)).join('')}</div>
-                <div><h3>OVER GOLS NO JOGO</h3>${counts.jogo.map((c, i) => renderBar(c, total, (i+0.5)+' Gols', i)).join('')}</div>
-                <div><h3>JOGADOR ${A}</h3>${counts.jogA.map((c, i) => renderBar(c, total, (i+0.5)+' Gols', i)).join('')}</div>
-                <div><h3>JOGADOR ${B}</h3>${counts.jogB.map((c, i) => renderBar(c, total, (i+0.5)+' Gols', i)).join('')}</div>
+                <div><h3>OVER GOLS NO 1º TEMPO</h3>${[0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5].map((meta) => renderBar(meta, meta+' Gols', confrontos, true)).join('')}</div>
+                <div><h3>OVER GOLS NO JOGO</h3>${[0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5].map((meta) => renderBar(meta, meta+' Gols', confrontos, false)).join('')}</div>
+                <div><h3>JOGADOR ${A}</h3>${[0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5].map((meta) => renderBar(meta, meta+' Gols', confrontos, false, A)).join('')}</div>
+                <div><h3>JOGADOR ${B}</h3>${[0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5].map((meta) => renderBar(meta, meta+' Gols', confrontos, false, B)).join('')}</div>
             </div>
         `;
     }
@@ -513,7 +536,6 @@
         const container = document.getElementById(containerId);
         container.innerHTML = ''; 
         const ultimos5 = resultados.slice(0, 5); 
-        
         while(ultimos5.length < 5) {
             ultimos5.push('vazio'); 
         }
@@ -521,22 +543,10 @@
         ultimos5.forEach(res => {
             const bola = document.createElement('div');
             bola.classList.add('bola-historico');
-            
-            // 1. Converte para string
-            // 2. Remove espaços extras (trim)
-            // 3. Converte para maiúsculo (toUpperCase)
-            const valorLimpo = String(res).trim().toUpperCase();
-
-            if (valorLimpo === 'V') {
-                bola.classList.add('bola-vitoria');
-            } else if (valorLimpo === 'D') {
-                bola.classList.add('bola-derrota');
-            } else if (valorLimpo === 'E') {
-                bola.classList.add('bola-empate');
-            } else {
-                bola.classList.add('bola-vazia');
-            }
-            
+            if (res === 'V') bola.classList.add('bola-vitoria');
+            else if (res === 'D') bola.classList.add('bola-derrota');
+            else if (res === 'E') bola.classList.add('bola-empate');
+            else bola.classList.add('bola-vazia');
             container.appendChild(bola);
         });
     }
