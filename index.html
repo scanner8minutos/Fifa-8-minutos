@@ -177,7 +177,7 @@
 </div>
 
 <footer>
-    <p>&copy; 2026 Scanner 8 Minutos. Todos os direitos reservados.</p>
+    <p>© 2026 Scanner 8 Minutos. Todos os direitos reservados.</p>
     <p>
         <a href="#" onclick="event.preventDefault(); abrirModalInfo('termos')" style="color: #ff8c00; text-decoration: none; margin: 0 10px;">Termos de Uso</a> | 
         <a href="#" onclick="event.preventDefault(); abrirModalInfo('privacidade')" style="color: #ff8c00; text-decoration: none; margin: 0 10px;">Política de Privacidade</a>
@@ -185,9 +185,9 @@
 </footer>
 
 <div id="modal-msg" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center;">
-    <div style="background: #1e1e1e; padding: 25px; border-radius: 15px; border: 2px solid #ff8c00; color: white; text-align: center; max-width: 300px; width: 90%;">
-        <p id="modal-text" style="font-size: 1.1em; margin-bottom: 20px; color: white !important;"></p>
-        <button onclick="document.getElementById('modal-msg').classList.add('hidden')" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #ff8c00; color: #000; font-weight: bold; cursor: pointer;">Fechar</button>
+    <div style="background: #1e1e1e; padding: 25px; border-radius: 15px; border: 2px solid #ff8c00; color: white; text-align: left; max-width: 750px; width: 90%; max-height: 85vh; overflow-y: auto;">
+        <p id="modal-text" style="font-size: 1em; margin-bottom: 20px; color: white !important; white-space: pre-line; line-height: 1.5;"></p>
+        <button onclick="document.getElementById('modal-msg').classList.add('hidden')" style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #ff8c00; color: #000; font-weight: bold; cursor: pointer;">Fechar</button>
     </div>
 </div>
 
@@ -224,13 +224,13 @@
         const modalText = document.getElementById('modal-text');
         
         if (tipo === 'termos') {
-            modalText.innerText = "Termos de Uso: Este sistema é uma ferramenta de análise de desempenho de jogadores de FIFA. NÃO somos indicação de investimento. Ao decidir realizar entradas em apostas esportivas, nunca entre às cegas; tome decisões baseadas em dados. É obrigatório ter 18 anos ou mais. Apostas esportivas envolvem riscos: jogue apenas o que você pode perder.";
+            modalText.innerText = "Termos de Uso: Este sistema é uma ferramenta avançada de análise de desempenho estatístico de jogadores de FIFA. NÃO somos recomendação de investimento ou garantia de lucro. Ao decidir realizar entradas em apostas esportivas, nunca opere às cegas; tome decisões embasadas em dados concretos. É estritamente obrigatório ter 18 anos ou mais. Apostas esportivas envolvem riscos reais: jogue apenas o que você pode perder e com total responsabilidade.";
         } 
         else if (tipo === 'privacidade') {
-            modalText.innerText = "Política de Privacidade: Seus dados estão seguros e são usados apenas para validação de acesso. Não compartilhamos informações com terceiros. Lembre-se: este sistema não é um conselho financeiro. O uso é estritamente proibido para menores de 18 anos. Analise os dados com responsabilidade e jogue com consciência.";
+            modalText.innerText = "Política de Privacidade: Seus dados estão seguros e são utilizados exclusivamente para validação de acesso à plataforma. Não compartilhamos informações com terceiros. Lembre-se: este sistema não constitui conselho financeiro. O uso é proibido para menores de 18 anos. Analise as estatísticas com critério e mantenha uma postura consciente.";
         }
         else if (tipo === 'sobre') {
-            modalText.innerText = "Sobre o Scanner 8 Minutos:\n\nEste sistema processa estatísticas avançadas para análise de confrontos.\n\n• FIFA disponíveis: E-Soccer - Battle Volta - 6 Minutos, E-Soccer - Battle - 8 Minutos.\n• Atualização dos dados: Realizada automaticamente todos os dias às 10h.\n\nLembre-se: O uso consciente e baseado em dados é fundamental.";
+            modalText.innerText = "Sobre o Scanner 8 Minutos:\n\nEste sistema processa estatísticas avançadas para a análise de confrontos e tendências de gols.\n\n• Competições monitoradas: E-Soccer - Battle 8 Minutos e Volta - 6 Minutos.\n• Atualização dos dados: Realizada de forma automatizada diariamente às 10h.\n\n---\n\nLÓGICA E INTELIGÊNCIA DO ALGORITMO:\n\n1. O Mercado Funciona por Fases (Sequências):\nNo futebol real, padrões duram meses. No Fifa, os algoritmos operam em ciclos. Um time com excelente média histórica pode entrar em uma 'seca' de 2 ou 3 dias. Se o robô usa apenas o histórico geral, ele fica 'preso ao passado' e ignora que o time travou. Com 40% de peso recente, o sistema percebe e reage rapidamente às mudanças de fase.\n\n2. Redução de Falsos Positivos em Dias Retraídos:\nEm momentos onde as defesas levam vantagem (muitos jogos 0x0 ou 1x0), o peso do momento atual puxa o Score para baixo automaticamente, impedindo entradas arriscadas baseadas apenas em confrontos de semanas atrás.\n\n3. O Ponto Doce (Equilíbrio Ideal):\n• 40% Frequência Geral: Olha o macro e a compatibilidade histórica das equipes.\n• 40% Histórico Recente: Dá sensibilidade de curto prazo para o comportamento das últimas horas.\n• 20% Confiança: Mede se a amostragem de dados é estatisticamente sólida.\n\nO futebol Fifa muda rápido, e essa distribuição garante reflexos precisos.";
         }
         
         document.getElementById('modal-msg').classList.remove('hidden');
@@ -246,7 +246,7 @@
         const user = document.getElementById('input-user').value;
         const pass = document.getElementById('input-pass').value;
         
-        if(!user || !pass) { alert("Preencha usuário e senha"); return; }
+        if(!user || !pass) { showModal("Preencha usuário e senha"); return; }
 
         btnLogin.innerText = "VALIDANDO...";
         
@@ -276,7 +276,16 @@
 
         } catch (err) {
             console.error(err);
-            showModal("Erro ao tentar realizar login: " + err.message);
+            
+            let mensagemAmigavel = "E-mail ou senha incorretos. Verifique seus dados.";
+            
+            if (err.message && (err.message.includes("single JSON object") || err.message.includes("Invalid login credentials"))) {
+                mensagemAmigavel = "Usuário não encontrado ou senha incorreta.";
+            } else if (err.message) {
+                mensagemAmigavel = "Erro ao tentar realizar login. Tente novamente mais tarde.";
+            }
+
+            showModal(mensagemAmigavel);
         }
         btnLogin.innerText = "Entrar";
     }
@@ -313,9 +322,9 @@
         const user = document.getElementById('cad-email').value;
         const pass = document.getElementById('cad-pass').value;
 
-        if (!user || !pass) { alert("Preencha todos os campos."); return; }
-        if (user.length > 60) { alert("O email deve ter no máximo 60 caracteres."); return; }
-        if (pass.length > 8) { alert("A senha deve ter no máximo 8 dígitos."); return; }
+        if (!user || !pass) { showModal("Preencha todos os campos."); return; }
+        if (user.length > 60) { showModal("O email deve ter no máximo 60 caracteres."); return; }
+        if (pass.length > 8) { showModal("A senha deve ter no máximo 8 dígitos."); return; }
 
         btn.innerText = "Cadastrando...";
         try {
@@ -332,11 +341,21 @@
 
             if (dbError) throw dbError;
             
-            alert("Cadastro realizado com sucesso! Agora você pode logar.");
+            showModal("Cadastro realizado com sucesso! Agora você pode logar.");
             document.getElementById('cadastro-container').classList.add('hidden');
             document.getElementById('login-container').classList.remove('hidden');
         } catch (err) { 
-            alert("Erro ao cadastrar: " + err.message); 
+            console.error(err);
+            
+            let mensagemAmigavel = "Erro ao realizar o cadastro. Tente novamente.";
+            
+            if (err.message && (err.message.includes("already registered") || err.message.includes("User already registered"))) {
+                mensagemAmigavel = "Este e-mail já está cadastrado em nossa base de dados.";
+            } else if (err.message) {
+                mensagemAmigavel = "Erro ao cadastrar: " + err.message;
+            }
+
+            showModal(mensagemAmigavel);
         }
         btn.innerText = "Criar Conta";
     }
@@ -352,7 +371,6 @@
                 gols = (c.Gols_Casa || 0) + (c.Gols_Visitante || 0);
             }
             
-            // Se for jogador específico, aplica lógica simples de gols do jogador
             if (jogador) {
                 const ehCasa = (c.Jogador_Casa === jogador);
                 gols = ehCasa ? (c.Gols_Casa || 0) : (c.Gols_Visitante || 0);
@@ -376,7 +394,7 @@
         
         const weighted_prob = (weightedSum / pesoTotal) * 100;
         const confianca_idx = Math.min(confrontos.length / 30, 1.0);
-        const finalScore = (freq_prob * 0.6) + (weighted_prob * 0.2) + (confianca_idx * 100 * 0.2);
+        const finalScore = (freq_prob * 0.4) + (weighted_prob * 0.4) + (confianca_idx * 100 * 0.2);
         
         return finalScore;
     }
@@ -395,7 +413,7 @@
                     
         if (error) { 
             console.error(error);
-            alert("Erro ao buscar dados: " + error.message); 
+            showModal("Erro ao buscar dados: " + error.message); 
             return; 
         }
         
@@ -483,9 +501,16 @@
                 return `<div class="card"><div style="margin-bottom:5px; font-size:12px;">${label}</div><a href="pagamento.html" class="btn-vip" target="_blank" style="padding: 5px; font-size: 11px;">🔒 APENAS VIP</a></div>`;
             }
             
+            let corBarra = '#dc3545';
+            if (val >= 80) {
+                corBarra = '#28a745';
+            } else if (val >= 70) {
+                corBarra = '#ffc107';
+            }
+            
             return `<div style="display:flex; align-items:center; gap:8px; margin: 3px 0; font-size:11px;">
                         <span style="min-width:55px;">${label}</span>
-                        <div style="background:#444; height:10px; width:100%; border-radius:5px;"><div style="background:${val >= 80 ? '#28a745' : '#dc3545'}; height:100%; width:${val.toFixed(0)}%;"></div></div>
+                        <div style="background:#444; height:10px; width:100%; border-radius:5px;"><div style="background:${corBarra}; height:100%; width:${val.toFixed(0)}%;"></div></div>
                         <span style="min-width:30px; text-align:right;">${val.toFixed(0)}%</span>
                     </div>`;
         };
