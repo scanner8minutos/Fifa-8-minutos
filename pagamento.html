@@ -3,139 +3,419 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scanner 8 Minutos - Pagamento</title>
-    <!-- Adicionando a biblioteca do Supabase -->
+    <title>Scanner 8 Minutos — Pagamento VIP</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-color: #121212;
-            --container-bg: #1a1a1a;
-            --input-bg: #2a2a2a;
-            --text-color: #ffffff;
-            --accent-green: #6d9c00;
-            --disabled-color: #444444;
+            --bg-dark: #090d16;
+            --card-bg: rgba(18, 24, 38, 0.95);
+            --input-bg: #141c2e;
+            --input-border: #243048;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
             --brand-orange: #ff8c00;
+            --brand-orange-hover: #ffa126;
+            --brand-orange-glow: rgba(255, 140, 0, 0.25);
+            --accent-green: #10b981;
+            --accent-green-hover: #059669;
+            --danger: #ef4444;
+            --radius-card: 20px;
+            --radius-input: 12px;
         }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 140, 0, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, #0d1322 0%, #070a12 100%);
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
+            padding: 24px 16px;
         }
-        .payment-card {
-            background-color: var(--container-bg);
-            padding: 25px;
-            border-radius: 15px;
+
+        .payment-wrapper {
             width: 100%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 2px solid var(--brand-orange);
+            max-width: 440px;
+            position: relative;
         }
-        h2 { margin-bottom: 5px; margin-top: 0px; }
-        .price { color: #ff8c00; font-size: 1.2em; margin-bottom: 10px; }
-        .form-group { text-align: left; margin-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; color: #ccc; }
+
+        .payment-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 32px 28px;
+            border-radius: var(--radius-card);
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 140, 0, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff8c00, #10b981, #ff8c00);
+            background-size: 200% 100%;
+            animation: moveGradient 4s linear infinite;
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .logo-imagem {
+            max-width: 240px;
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .badge-vip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 140, 0, 0.15);
+            color: var(--brand-orange);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+
+        .price-box {
+            background: linear-gradient(180deg, rgba(255, 140, 0, 0.1) 0%, rgba(255, 140, 0, 0.03) 100%);
+            border: 1px solid rgba(255, 140, 0, 0.25);
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin: 12px 0 16px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .price-title {
+            text-align: left;
+        }
+
+        .price-title span {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .price-title strong {
+            font-size: 0.95rem;
+            color: #ffffff;
+        }
+
+        .price-value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--brand-orange);
+            letter-spacing: -0.02em;
+        }
+
+        .price-value small {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .notice-banner {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px dashed rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.78rem;
+            color: #a7f3d0;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            text-align: left;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 14px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
         input {
             width: 100%;
-            padding: 10px;
+            padding: 12px 14px;
             background-color: var(--input-bg);
-            border: 1px solid var(--brand-orange);
-            border-radius: 8px;
-            color: white;
-            box-sizing: border-box; 
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-input);
+            color: #ffffff;
+            font-size: 0.92rem;
+            transition: all 0.2s ease;
         }
-        input:focus { outline: 1px solid var(--accent-green); }
+
+        input::placeholder {
+            color: #64748b;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--brand-orange);
+            box-shadow: 0 0 0 3px var(--brand-orange-glow);
+            background-color: #182238;
+        }
+
+        .form-hint {
+            font-size: 0.72rem;
+            color: #64748b;
+            margin-top: 4px;
+            display: block;
+        }
+
         #btn-pagar {
             width: 100%;
-            padding: 12px;
-            background-color: var(--disabled-color);
-            color: white;
+            padding: 15px;
+            background: #334155;
+            color: #94a3b8;
             border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
+            border-radius: var(--radius-input);
+            font-weight: 700;
+            font-size: 1rem;
             cursor: not-allowed;
-            margin-top: 10px;
-            transition: 0.3s;
-        }
-        #btn-pagar.active {
-            background-color: var(--accent-green);
-            cursor: pointer;
-        }
-        .security-footer {
-            margin-top: 15px;
-            font-size: 12px;
-            color: #666;
+            margin-top: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 8px;
         }
-        .logo-imagem {
-            max-width: 300px;
-            width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto 0px auto;
+
+        #btn-pagar.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+        }
+
+        #btn-pagar.active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45);
+        }
+
+        #btn-pagar.active:active {
+            transform: translateY(0);
+        }
+
+        .security-footer {
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: #64748b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .security-badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: #94a3b8;
+            font-size: 0.72rem;
+        }
+
+        .security-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 16px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--brand-orange);
+            text-decoration: underline;
+        }
+
+        /* Toast / Alert Modal */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            border: 1px solid #ef4444;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+            z-index: 9999;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
         }
     </style>
-</head>
+<script src="/_aistudio-iframe.js?v=2f1c016a"></script></head>
 <body>
 
-<div class="payment-card">
-    <img src="logo.png" alt="Scanner 8 Minutos" class="logo-imagem">
-    <h2>Assinatura</h2>
-    <div class="price">Plano Mensal — <b>R$ 39,90</b> / 30 dias</div>
-    <p style="font-size: 0.75em; color: #888; margin-top: 10px; font-style: italic;">
-        Após o pagamento, o acesso a todos os dados será liberado em cerca de 10 minutos, podendo ocorrer antes. 
-    </p>
-    <form id="paymentForm">
-        <div class="form-group">
-            <label>Nome Completo</label>
-            <input type="text" id="nome" placeholder="Seu nome completo" maxlength="60" required>
+<div class="payment-wrapper">
+    <div class="payment-card">
+        <div class="logo-container">
+            <img src="logo.png" alt="Scanner 8 Minutos" class="logo-imagem">
         </div>
 
-        <div class="form-group">
-            <label>CPF (apenas números)</label>
-            <input type="text" id="cpf" placeholder="00000000000" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+        <div class="badge-vip">✨ Acesso Ilimitado</div>
+        <h2>Assinatura VIP</h2>
+        
+        <div class="price-box">
+            <div class="price-title">
+                <strong>Plano Mensal</strong>
+                <span>Renovação a cada 30 dias</span>
+            </div>
+            <div class="price-value">
+                R$ 39,90 <small>/mês</small>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label>E-mail (deve ser o mesmo do cadastro)</label>
-            <input type="email" id="email" placeholder="seu@email.com" required>
+        <div class="notice-banner">
+            <span>⚡</span>
+            <div>Após o pagamento, o acesso VIP completo será liberado automaticamente em até 10 minutos.</div>
         </div>
 
-        <div class="form-group">
-            <label>Telefone / WhatsApp (com DDD)</label>
-            <input type="tel" id="telefone" placeholder="11999999999" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+        <form id="paymentForm" onsubmit="event.preventDefault(); realizarPagamento();">
+            <div class="form-group">
+                <label for="nome">Nome Completo</label>
+                <input type="text" id="nome" placeholder="Digite seu nome completo" maxlength="60" required autocomplete="name">
+            </div>
+
+            <div class="form-group">
+                <label for="cpf">CPF (apenas números)</label>
+                <input type="text" id="cpf" placeholder="00000000000" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required inputmode="numeric">
+                <span class="form-hint">11 dígitos sem pontos ou traços</span>
+            </div>
+
+            <div class="form-group">
+                <label for="email">E-mail Cadastrado</label>
+                <input type="email" id="email" placeholder="seu@email.com" required autocomplete="email">
+                <span class="form-hint">Deve ser o mesmo e-mail do seu cadastro no sistema</span>
+            </div>
+
+            <div class="form-group">
+                <label for="telefone">WhatsApp / Telefone (com DDD)</label>
+                <input type="tel" id="telefone" placeholder="11999999999" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required inputmode="numeric">
+                <span class="form-hint">DDD + 9 dígitos (ex: 11987654321)</span>
+            </div>
+
+            <button type="submit" id="btn-pagar" disabled>
+                <span>Pagar via Mercado Pago</span>
+            </button>
+        </form>
+
+        <div class="security-footer">
+            <div class="security-badges">
+                <div class="security-item">🔒 Conexão Criptografada SSL</div>
+                <div class="security-item">💳 Mercado Pago</div>
+            </div>
+            <div>Pagamento 100% seguro com liberação rápida</div>
+            <a href="index.html" class="back-link">← Voltar para o Analisador</a>
         </div>
-        <button type="button" id="btn-pagar" disabled onclick="realizarPagamento()">Pagar via Mercado Pago</button>
-    </form>
-    <div class="security-footer">
-        🔒 Pagamento 100% seguro via Mercado Pago
     </div>
 </div>
 
+<div id="toast" class="toast"></div>
 
 <script>
-    // 1. Configurações
+    // 1. Configurações Supabase
     const supabaseUrl = 'https://afezbragrjyovmgwjmeq.supabase.co';
     const supabaseAnonKey = 'sb_publishable_FICkQvqGT4az5kAmUnpLww_oKlVLlqD';
 
-    // 2. Inicialização correta (extraímos a função createClient do objeto supabase global)
+    // 2. Inicialização Supabase
     const { createClient } = supabase;
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
     const form = document.getElementById('paymentForm');
     const inputs = form.querySelectorAll('input');
     const btnPagar = document.getElementById('btn-pagar');
+    const toast = document.getElementById('toast');
 
-    // 3. Função de validação
+    function showNotification(msg, isError = true) {
+        toast.innerText = msg;
+        toast.style.borderColor = isError ? '#ef4444' : '#10b981';
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000);
+    }
+
+    // 3. Validação em tempo real
     function validateForm() {
         let allFilled = true;
         inputs.forEach(input => {
@@ -153,62 +433,83 @@
         }
     }
 
-// 4. Função de envio com validações de limite e formato
+    // 4. Envio dos dados de pagamento e redirecionamento Mercado Pago
     async function realizarPagamento() {
         if (btnPagar.disabled) return;
 
-        // --- Validações de Segurança ---
         const nome = document.getElementById('nome').value.trim();
         const cpf = document.getElementById('cpf').value.trim();
         const email = document.getElementById('email').value.trim();
         const telefone = document.getElementById('telefone').value.trim();
 
-        // Regex para validar formato de e-mail genérico
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (nome.length < 3) {
-            alert("Por favor, digite seu nome completo.");
+            showNotification("Por favor, digite seu nome completo.");
+            document.getElementById('nome').focus();
             return;
         }
         if (cpf.length !== 11) {
-            alert("CPF inválido! O campo deve conter exatamente 11 números.");
+            showNotification("CPF inválido! O campo deve conter exatamente 11 números.");
+            document.getElementById('cpf').focus();
             return;
         }
         if (!emailRegex.test(email)) {
-            alert("E-mail inválido! Certifique-se de incluir @ e o domínio (ex: .com, .br).");
+            showNotification("E-mail inválido! Certifique-se de incluir @ e o domínio.");
+            document.getElementById('email').focus();
             return;
         }
         if (telefone.length < 10 || telefone.length > 11) {
-            alert("Telefone inválido! Inclua o DDD + número (10 a 11 dígitos).");
+            showNotification("Telefone inválido! Inclua o DDD + número (10 a 11 dígitos).");
+            document.getElementById('telefone').focus();
             return;
         }
 
-        // --- Processamento ---
-        btnPagar.innerText = "Salvando...";
+        btnPagar.innerHTML = '<span>Processando...</span>';
         btnPagar.disabled = true;
 
-        const { error } = await supabaseClient
-            .from('pagamentos')
-            .insert([{
-                nome: nome,
-                cpf: cpf,
-                email: email,
-                telefone: telefone
-            }]);
+        try {
+            const { error } = await supabaseClient
+                .from('pagamentos')
+                .insert([{
+                    nome: nome,
+                    cpf: cpf,
+                    email: email,
+                    telefone: telefone
+                }]);
 
-        if (error) {
-            console.error("Erro Supabase:", error);
-            alert("Erro ao salvar dados. Tente novamente.");
-            btnPagar.innerText = "Pagar via Mercado Pago";
+            if (error) {
+                console.error("Erro Supabase:", error);
+                showNotification("Erro ao salvar dados. Tente novamente.");
+                btnPagar.innerHTML = '<span>Pagar via Mercado Pago</span>';
+                btnPagar.disabled = false;
+            } else {
+                showNotification("Dados salvos com sucesso! Redirecionando...", false);
+                setTimeout(() => {
+                    window.location.href = "https://mpago.la/1gath2F";
+                }, 1000);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            showNotification("Ocorreu um erro. Tente novamente.");
+            btnPagar.innerHTML = '<span>Pagar via Mercado Pago</span>';
             btnPagar.disabled = false;
-        } else {
-            window.location.href = "https://mpago.la/1gath2F";
         }
     }
 
-    // 5. Listener (Mantido igual)
+    // 5. Listeners para validação contínua
     inputs.forEach(input => {
         input.addEventListener('input', validateForm);
+    });
+
+    // Auto-preencher email se passado na URL (ex: pagamento.html?email=teste@email.com)
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const emailParam = params.get('email');
+        if (emailParam) {
+            document.getElementById('email').value = emailParam;
+            validateForm();
+        }
     });
 </script>
 
